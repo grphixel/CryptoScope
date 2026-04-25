@@ -20,8 +20,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
   <!-- html2canvas for screenshot -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk/dist/index.min.js"></script>
+  
   <style>
     :root {
       --gold: #FFD055;
@@ -775,6 +775,9 @@ function shareToFarcaster() {
 function setStatus(msg) {
   const el = document.getElementById('shareStatus');
   if (el) { el.textContent = msg; setTimeout(() => { el.textContent=''; }, 4000); }
+}
+  if (window.sdk) {
+  window.sdk.actions.ready();
 }
 </script>
 </body>
