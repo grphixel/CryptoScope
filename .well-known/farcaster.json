@@ -1,3 +1,16 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  other: {
+    'base:app_id': '6998ae1d2fd3adba912f7875',
+  },
+};
+
+export default function Home() {
+  return (<div>{/* Your page content */}</div>);
+}
+
+
 {
   "accountAssociation": {
     "header": "",
