@@ -1,0 +1,16 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "frame": {
+    "version": "1",
+    "name": "Cryptoscope",
+    "iconUrl": "https://cryptoscope-based.vercel.app/icon.png",
+    "homeUrl": "https://cryptoscope-based.vercel.app",
+    "imageUrl": "https://cryptoscope-based.vercel.app/og-image.png",
+    "buttonTitle": "✦ Get My Reading",
+    "splashBackgroundColor": "#060811"
+  }
+}
