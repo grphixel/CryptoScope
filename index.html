@@ -642,7 +642,11 @@ async function fetchReading(idx) {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+  'Content-Type': 'application/json',
+  'x-api-key': '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',
+  'anthropic-version': '2023-06-01'
+},
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
