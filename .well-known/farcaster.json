@@ -16,3 +16,10 @@
     "tags": ["horoscope", "crypto", "base", "fun"]
   }
 }
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjQwNDgzOSwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDk5MTQ0NUY1Nzc4MDY5ODZCZjI4ZjY2NEMzYjkyNTBDRjM5RkMzZTUifQ",
+    "payload": "eyJkb21haW4iOiJjcnlwdG9zY29wZS1iYXNlZC52ZXJjZWwuYXBwIn0",
+    "signature": "4ZwffZQQ8c9/Qlr7YoFAAWcvmlY5Pasr6rx1VbOmJf1KwbndQ5l70MLwLVzcXMdJ0P+xvt4Gdl9v7GhKqUhcUBs="
+  }
+}
