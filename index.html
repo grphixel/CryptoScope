@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cryptoscope — Your Daily Cosmic Crypto Reading</title>
+  <meta name="description" content="AI-powered horoscope meets crypto. Get your daily Cryptoscope reading — built on Base." />
+
+  <!-- Open Graph / Farcaster Frame -->
+  <meta property="og:title" content="Cryptoscope ✦ Cosmic Crypto Readings" />
+  <meta property="og:description" content="AI-powered horoscope meets crypto. Built on Base." />
+  <meta property="og:image" content="https://cryptoscope.xyz/og-image.png" />
+  <meta property="og:url" content="https://cryptoscope.xyz" />
+  <meta property="fc:frame" content="vNext" />
+  <meta property="fc:frame:image" content="https://cryptoscope.xyz/og-image.png" />
+  <meta property="fc:frame:button:1" content="✦ Get My Reading" />
+  <meta property="fc:frame:post_url" content="https://cryptoscope.xyz/api/frame" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <!-- html2canvas for screenshot -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --gold: #FFD055;
+      --gold-dim: rgba(255, 208, 85, 0.18);
+      --gold-border: rgba(255, 208, 85, 0.28);
+      --teal: #4DFFD2;
+      --red: #FF6B6B;
+      --bg: #060811;
+      --bg2: #0C1020;
+      --text: #DDD8FF;
+      --muted: #5A5880;
+      --card-bg: rgba(255,255,255,0.028);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── STAR FIELD ── */
+    #starfield {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, #0e1535 0%, #060811 70%);
+    }
+    .star {
+      position: absolute; border-radius: 50%; background: #fff;
+      animation: twinkle var(--d) ease-in-out infinite var(--delay);
+    }
+    @keyframes twinkle { 0%,100%{opacity:.15;transform:scale(1)} 50%{opacity:.9;transform:scale(1.4)} }
+
+    /* ── NEBULA GLOW ── */
+    .nebula {
+      position: fixed; border-radius: 50%; filter: blur(80px);
+      pointer-events: none; z-index: 0; opacity: 0.07;
+    }
+    .nebula-1 { width: 500px; height: 300px; background: #5533ff; top: -80px; left: -100px; }
+    .nebula-2 { width: 400px; height: 400px; background: #FFD055; top: 40%; right: -120px; }
+    .nebula-3 { width: 300px; height: 300px; background: #4DFFD2; bottom: -60px; left: 30%; }
+
+    /* ── LAYOUT ── */
+    .container {
+      position: relative; z-index: 1;
+      max-width: 520px; margin: 0 auto;
+      padding: 0 16px 40px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      text-align: center;
+      padding: 36px 0 24px;
+    }
+    .logo {
+      font-family: 'Cinzel', serif;
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #FFD055 0%, #FFA020 50%, #FFD055 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+    @keyframes shimmer { to { background-position: 200% center; } }
+
+    .logo-glyph { font-size: 22px; opacity: 0.7; }
+    .tagline {
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+    .header-line {
+      width: 140px; height: 1px; margin: 18px auto 0;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    /* ── DATE INPUT ── */
+    .date-section {
+      margin-bottom: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--gold-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .date-section::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .section-label {
+      font-size: 8px; letter-spacing: 3px; color: var(--muted);
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .date-row { display: flex; gap: 8px; align-items: center; }
+    .date-input {
+      flex: 1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,208,85,0.2);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .date-input:focus { border-color: rgba(255,208,85,0.55); }
+    .date-input::-webkit-calendar-picker-indicator {
+      filter: invert(1) sepia(1) saturate(2) hue-rotate(10deg);
+      opacity: 0.45; cursor: pointer;
+    }
+    .reveal-btn {
+      background: var(--gold-dim);
+      border: 1px solid var(--gold-border);
+      border-radius: 8px;
+      color: var(--gold);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      padding: 9px 16px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .reveal-btn:hover { background: rgba(255,208,85,0.22); }
+
+    /* ── SIGN GRID ── */
+    .sign-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .sign-btn {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,208,85,0.1);
+      border-radius: 10px;
+      padding: 8px 4px 7px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.18s ease;
+      color: var(--muted);
+    }
+    .sign-btn:hover {
+      background: var(--gold-dim);
+      border-color: var(--gold-border);
+      color: var(--gold);
+      transform: translateY(-2px);
+    }
+    .sign-btn.active {
+      background: rgba(255,208,85,0.14);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .sign-sym { font-size: 18px; display: block; line-height: 1; }
+    .sign-lbl { font-size: 7px; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 4px; }
+
+    /* ── READING CARD ── */
+    #readingCard {
+      background: var(--card-bg);
+      border: 1px solid var(--gold-border);
+      border-radius: 14px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      min-height: 120px;
+      transition: all 0.3s ease;
+    }
+    #readingCard::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 28px 0;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
+
+    .sign-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .big-glyph {
+      font-size: 36px;
+      width: 58px; height: 58px; flex-shrink: 0;
+      border-radius: 50%;
+      background: rgba(255,208,85,0.08);
+      border: 1px solid rgba(255,208,85,0.25);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sign-name-title {
+      font-family: 'Cinzel', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--gold);
+    }
+    .sign-meta { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-top: 3px; }
+
+    .reading-body {
+      font-size: 12px;
+      line-height: 2;
+      color: #CAC5F5;
+      border-top: 1px solid rgba(255,255,255,0.055);
+      padding-top: 14px;
+      min-height: 72px;
+    }
+
+    .ai-loading {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    /* ── TOKEN CARDS ── */
+    .tokens-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .token-card {
+      border-radius: 10px;
+      padding: 11px 13px;
+    }
+    .token-card.lucky {
+      background: rgba(77,255,210,0.06);
+      border: 1px solid rgba(77,255,210,0.22);
+    }
+    .token-card.unlucky {
+      background: rgba(255,107,107,0.06);
+      border: 1px solid rgba(255,107,107,0.18);
+    }
+    .token-lbl { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+    .token-card.lucky .token-lbl { color: var(--teal); }
+    .token-card.unlucky .token-lbl { color: var(--red); }
+    .token-ticker { font-size: 15px; font-weight: 500; }
+    .token-card.lucky .token-ticker { color: var(--teal); }
+    .token-card.unlucky .token-ticker { color: var(--red); }
+    .token-why { font-size: 9px; color: var(--muted); margin-top: 3px; line-height: 1.55; }
+
+    /* ── BADGES ROW ── */
+    .badges-row {
+      display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap;
+    }
+    .badge {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 20px;
+      padding: 4px 11px;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+    .badge-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    /* ── SHARE SECTION ── */
+    .share-section {
+      margin-top: 16px;
+      display: none;
+    }
+    .share-section.visible { display: block; }
+    .share-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,208,85,0.2), transparent);
+      margin-bottom: 12px;
+    }
+    .share-label { font-size: 8px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+    .share-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .share-btn {
+      flex: 1;
+      border-radius: 9px;
+      padding: 10px 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      border: none;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      white-space: nowrap;
+    }
+    .share-btn-capture {
+      background: var(--gold-dim);
+      border: 1px solid var(--gold-border);
+      color: var(--gold);
+    }
+    .share-btn-capture:hover { background: rgba(255,208,85,0.22); }
+    .share-btn-x {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #fff;
+    }
+    .share-btn-x:hover { background: rgba(255,255,255,0.1); }
+    .share-btn-fc {
+      background: rgba(136,88,255,0.1);
+      border: 1px solid rgba(136,88,255,0.3);
+      color: #A888FF;
+    }
+    .share-btn-fc:hover { background: rgba(136,88,255,0.18); }
+    .share-status {
+      font-size: 9px;
+      color: var(--teal);
+      text-align: center;
+      margin-top: 8px;
+      letter-spacing: 1px;
+      min-height: 14px;
+    }
+
+    /* ── FOOTER CONTROLS ── */
+    .footer-controls {
+      display: flex; justify-content: center; gap: 10px;
+      margin-top: 18px; flex-wrap: wrap;
+    }
+    .ctrl-btn {
+      background: transparent;
+      border: 1px solid var(--gold-border);
+      color: var(--gold);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      padding: 9px 20px;
+      border-radius: 24px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    .ctrl-btn:hover { background: var(--gold-dim); transform: translateY(-1px); }
+
+    .disclaimer {
+      text-align: center;
+      font-size: 8px;
+      color: #252840;
+      letter-spacing: 1px;
+      margin-top: 16px;
+    }
+
+    /* ── CURSOR ── */
+    .cursor {
+      display: inline-block; width: 2px; height: 12px;
+      background: #CAC5F5; margin-left: 2px;
+      animation: blink 0.85s step-end infinite;
+      vertical-align: middle;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── SHARE CARD (off-screen render target) ── */
+    #shareCanvas {
+      position: fixed;
+      left: -9999px; top: -9999px;
+      width: 600px;
+      background: #060811;
+      border-radius: 18px;
+      padding: 36px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #DDD8FF;
+      border: 1px solid rgba(255,208,85,0.35);
+    }
+    #shareCanvas .sc-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      letter-spacing: 5px;
+      color: #FFD055;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      opacity: 0.8;
+    }
+    #shareCanvas .sc-sign-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    #shareCanvas .sc-glyph {
+      font-size: 44px; width: 70px; height: 70px;
+      border-radius: 50%;
+      background: rgba(255,208,85,0.1);
+      border: 1px solid rgba(255,208,85,0.3);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    #shareCanvas .sc-sign-name { font-family: 'Cinzel', serif; font-size: 22px; color: #FFD055; font-weight: 700; }
+    #shareCanvas .sc-dates { font-size: 11px; color: #5A5880; margin-top: 4px; letter-spacing: 1px; }
+    #shareCanvas .sc-reading {
+      font-size: 13px; line-height: 2.1; color: #CAC5F5;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-top: 18px; margin-bottom: 22px;
+    }
+    #shareCanvas .sc-tokens { display: flex; gap: 12px; margin-bottom: 20px; }
+    #shareCanvas .sc-token-lucky {
+      flex: 1; border-radius: 10px; padding: 12px 14px;
+      background: rgba(77,255,210,0.07); border: 1px solid rgba(77,255,210,0.22);
+    }
+    #shareCanvas .sc-token-unlucky {
+      flex: 1; border-radius: 10px; padding: 12px 14px;
+      background: rgba(255,107,107,0.07); border: 1px solid rgba(255,107,107,0.2);
+    }
+    #shareCanvas .sc-tlabel { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+    #shareCanvas .sc-token-lucky .sc-tlabel { color: #4DFFD2; }
+    #shareCanvas .sc-token-unlucky .sc-tlabel { color: #FF6B6B; }
+    #shareCanvas .sc-tticker { font-size: 18px; font-weight: 500; }
+    #shareCanvas .sc-token-lucky .sc-tticker { color: #4DFFD2; }
+    #shareCanvas .sc-token-unlucky .sc-tticker { color: #FF6B6B; }
+    #shareCanvas .sc-twhy { font-size: 10px; color: #5A5880; margin-top: 3px; }
+    #shareCanvas .sc-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      border-top: 1px solid rgba(255,208,85,0.12);
+      padding-top: 16px;
+      font-size: 10px; color: #3A3860; letter-spacing: 1px;
+    }
+    #shareCanvas .sc-url { color: rgba(255,208,85,0.5); letter-spacing: 2px; font-size: 11px; }
+  </style>
+</head>
+<body>
+
+<div id="starfield"></div>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+
+<div class="container">
+  <header>
+    <div class="logo"><span class="logo-glyph">✦</span> Cryptoscope <span class="logo-glyph">✦</span></div>
+    <div class="tagline">AI-powered cosmic crypto readings · on Base</div>
+    <div class="header-line"></div>
+  </header>
+
+  <!-- Date picker -->
+  <div class="date-section">
+    <div class="section-label">enter birth date to reveal your sign</div>
+    <div class="date-row">
+      <input type="date" class="date-input" id="birthDate" />
+      <button class="reveal-btn" onclick="detectSign()">✦ Reveal</button>
+    </div>
+  </div>
+
+  <!-- Sign grid -->
+  <div class="sign-grid" id="signGrid"></div>
+
+  <!-- Reading card -->
+  <div id="readingCard">
+    <div class="empty-state">— select your sign to receive the cosmic transmission —</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-controls">
+    <button class="ctrl-btn" onclick="randomSign()">✦ Shuffle cosmos</button>
+    <button class="ctrl-btn" onclick="refreshReading()">↺ New reading</button>
+  </div>
+  <div class="disclaimer">not financial advice · mercury was retrograde during development · built on base</div>
+</div>
+
+<!-- Off-screen share card -->
+<div id="shareCanvas"></div>
+
+<script>
+// ── DATA ──
+const SIGNS = [
+  { sym:'♈', name:'Aries',       dates:'Mar 21 – Apr 19', el:'Fire',  coin:'BTC',   cc:'#F7931A', sm:3, sd:21, em:4,  ed:19 },
+  { sym:'♉', name:'Taurus',      dates:'Apr 20 – May 20', el:'Earth', coin:'ETH',   cc:'#627EEA', sm:4, sd:20, em:5,  ed:20 },
+  { sym:'♊', name:'Gemini',      dates:'May 21 – Jun 20', el:'Air',   coin:'SOL',   cc:'#9945FF', sm:5, sd:21, em:6,  ed:20 },
+  { sym:'♋', name:'Cancer',      dates:'Jun 21 – Jul 22', el:'Water', coin:'USDC',  cc:'#2775CA', sm:6, sd:21, em:7,  ed:22 },
+  { sym:'♌', name:'Leo',         dates:'Jul 23 – Aug 22', el:'Fire',  coin:'DOGE',  cc:'#C2A633', sm:7, sd:23, em:8,  ed:22 },
+  { sym:'♍', name:'Virgo',       dates:'Aug 23 – Sep 22', el:'Earth', coin:'LINK',  cc:'#2A5ADA', sm:8, sd:23, em:9,  ed:22 },
+  { sym:'♎', name:'Libra',       dates:'Sep 23 – Oct 22', el:'Air',   coin:'UNI',   cc:'#FF007A', sm:9, sd:23, em:10, ed:22 },
+  { sym:'♏', name:'Scorpio',     dates:'Oct 23 – Nov 21', el:'Water', coin:'XRP',   cc:'#00AAE4', sm:10,sd:23, em:11, ed:21 },
+  { sym:'♐', name:'Sagittarius', dates:'Nov 22 – Dec 21', el:'Fire',  coin:'AVAX',  cc:'#E84142', sm:11,sd:22, em:12, ed:21 },
+  { sym:'♑', name:'Capricorn',   dates:'Dec 22 – Jan 19', el:'Earth', coin:'MATIC', cc:'#8247E5', sm:12,sd:22, em:1,  ed:19 },
+  { sym:'♒', name:'Aquarius',    dates:'Jan 20 – Feb 18', el:'Air',   coin:'ADA',   cc:'#0055D4', sm:1, sd:20, em:2,  ed:18 },
+  { sym:'♓', name:'Pisces',      dates:'Feb 19 – Mar 20', el:'Water', coin:'DOT',   cc:'#E6007A', sm:2, sd:19, em:3,  ed:20 },
+];
+
+const ALL_TOKENS = ['BTC','ETH','SOL','DOGE','ADA','AVAX','LINK','UNI','XRP','DOT','MATIC','SHIB','PEPE','WIF','BONK','ARB','OP','INJ','TIA','RENDER','FET','NEAR','APT','SUI','TON','BRETT','MOODENG','POPCAT'];
+const ENERGIES = ['Bullish','Bearish','Sideways crabbing','Accumulating','Diamond hands','WAGMI','Volatile AF','Based','Degen hours','Printing','Rekt adjacent','Moon incoming'];
+
+let currentSign = null;
+let currentReading = null;
+let currentTokens = null;
+let isLoading = false;
+
+// ── STARS ──
+(function() {
+  const c = document.getElementById('starfield');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2.2 + 0.4;
+    s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*5}s;--delay:${-Math.random()*5}s;opacity:0`;
+    c.appendChild(s);
+  }
+})();
+
+// ── SIGN GRID ──
+(function() {
+  const grid = document.getElementById('signGrid');
+  SIGNS.forEach((s, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'sign-btn';
+    btn.id = 'sb-'+i;
+    btn.innerHTML = `<span class="sign-sym">${s.sym}</span><span class="sign-lbl">${s.name}</span>`;
+    btn.onclick = () => selectSign(i);
+    grid.appendChild(btn);
+  });
+})();
+
+// ── HELPERS ──
+function getSignIndex(month, day) {
+  for (let i = 0; i < SIGNS.length; i++) {
+    const s = SIGNS[i];
+    if (s.sm <= s.em) {
+      if ((month === s.sm && day >= s.sd) || (month > s.sm && month < s.em) || (month === s.em && day <= s.ed)) return i;
+    } else {
+      if ((month === s.sm && day >= s.sd) || month > s.sm || (month === s.em && day <= s.ed) || month < s.em) return i;
+    }
+  }
+  return 0;
+}
+
+function detectSign() {
+  const val = document.getElementById('birthDate').value;
+  if (!val) return;
+  const d = new Date(val);
+  selectSign(getSignIndex(d.getMonth()+1, d.getDate()));
+}
+
+function randomSign() {
+  selectSign(Math.floor(Math.random() * SIGNS.length));
+}
+
+function refreshReading() {
+  if (currentSign !== null) fetchReading(currentSign);
+}
+
+function pickTokens() {
+  const pool = [...ALL_TOKENS];
+  const li = Math.floor(Math.random() * pool.length);
+  const lucky = pool.splice(li, 1)[0];
+  const unlucky = pool[Math.floor(Math.random() * pool.length)];
+  return { lucky, unlucky };
+}
+
+function getEnergy() {
+  return ENERGIES[Math.floor(Math.random() * ENERGIES.length)];
+}
+
+// ── SELECT & FETCH ──
+function selectSign(idx) {
+  if (isLoading) return;
+  currentSign = idx;
+  document.querySelectorAll('.sign-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  fetchReading(idx);
+}
+
+async function fetchReading(idx) {
+  if (isLoading) return;
+  isLoading = true;
+  const sign = SIGNS[idx];
+  const tokens = pickTokens();
+  currentTokens = tokens;
+  const energy = getEnergy();
+  const today = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+  // Show skeleton
+  const card = document.getElementById('readingCard');
+  card.innerHTML = `
+    <div class="sign-header">
+      <div class="big-glyph">${sign.sym}</div>
+      <div>
+        <div class="sign-name-title">${sign.name}</div>
+        <div class="sign-meta">${sign.dates} · ${sign.el} · ${sign.coin}</div>
+      </div>
+    </div>
+    <div class="reading-body"><span class="ai-loading">↯ channeling cosmic frequencies...</span></div>
+    <div class="tokens-grid">
+      <div class="token-card lucky">
+        <div class="token-lbl">✦ lucky token</div>
+        <div class="token-ticker">${tokens.lucky}</div>
+        <div class="token-why" id="luckyWhy">consulting oracle...</div>
+      </div>
+      <div class="token-card unlucky">
+        <div class="token-lbl">✕ avoid today</div>
+        <div class="token-ticker">${tokens.unlucky}</div>
+        <div class="token-why" id="unluckyWhy">consulting oracle...</div>
+      </div>
+    </div>
+    <div class="badges-row">
+      <span class="badge"><span class="badge-dot" style="background:${sign.cc}"></span>${sign.coin} aligned</span>
+      <span class="badge">energy: ${energy}</span>
+    </div>
+    <div class="share-section" id="shareSection">
+      <div class="share-divider"></div>
+      <div class="share-label">share your reading</div>
+      <div class="share-btns">
+        <button class="share-btn share-btn-capture" onclick="captureCard()">📸 Save card</button>
+        <button class="share-btn share-btn-x" onclick="shareToX()">𝕏 Post</button>
+        <button class="share-btn share-btn-fc" onclick="shareToFarcaster()">⬡ Cast</button>
+      </div>
+      <div class="share-status" id="shareStatus"></div>
+    </div>
+  `;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are Cryptoscope, a witty cosmic crypto oracle. Write fun, tongue-in-cheek horoscope readings blending astrology with crypto culture. Tone: playful, self-aware, slightly roasting, but weirdly wise. Reference real crypto concepts naturally (gas fees, FOMO, HODL, DCA, rugs, diamond hands, aping in, etc). Readings: 3-4 punchy sentences. Respond ONLY in raw JSON. No markdown. No backticks. No preamble.`,
+        messages: [{
+          role: 'user',
+          content: `Generate a daily Cryptoscope reading for ${sign.name} (${sign.el} sign, ruling coin: ${sign.coin}) for ${today}. Today's energy: "${energy}". Lucky token: ${tokens.lucky}. Unlucky token: ${tokens.unlucky}.
+
+Return this exact JSON:
+{"reading":"3-4 sentence reading that roasts and loves ${sign.name} energy while weaving in crypto culture","lucky_reason":"witty phrase max 7 words why ${tokens.lucky} is blessed","unlucky_reason":"witty phrase max 7 words why ${tokens.unlucky} is cursed"}`
+        }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content.filter(b => b.type==='text').map(b => b.text).join('');
+    let parsed;
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+    catch(e) { parsed = { reading: raw, lucky_reason: 'the stars say so', unlucky_reason: 'mercury disapproves' }; }
+
+    currentReading = parsed;
+
+    // Type out reading
+    const rb = card.querySelector('.reading-body');
+    rb.innerHTML = '<span id="typeTarget"></span><span class="cursor"></span>';
+    typeText(parsed.reading, document.getElementById('typeTarget'), () => {
+      rb.querySelector('.cursor').remove();
+    });
+
+    card.querySelector('#luckyWhy').textContent = parsed.lucky_reason || 'cosmic alignment active';
+    card.querySelector('#unluckyWhy').textContent = parsed.unlucky_reason || 'bad vibes incoming';
+
+    document.getElementById('shareSection').classList.add('visible');
+
+  } catch(e) {
+    card.querySelector('.reading-body').textContent = 'The oracle is temporarily offline. Even the cosmos need downtime. Try again.';
+  }
+
+  isLoading = false;
+}
+
+function typeText(text, el, onDone) {
+  let i = 0; el.textContent = '';
+  const iv = setInterval(() => {
+    el.textContent += text[i++];
+    if (i >= text.length) { clearInterval(iv); if (onDone) onDone(); }
+  }, 15);
+}
+
+// ── SHARE CARD BUILDER ──
+function buildShareCard() {
+  if (!currentReading || currentSign === null) return;
+  const sign = SIGNS[currentSign];
+  const tokens = currentTokens;
+  const sc = document.getElementById('shareCanvas');
+  sc.innerHTML = `
+    <div class="sc-logo">✦ Cryptoscope ✦</div>
+    <div class="sc-sign-row">
+      <div class="sc-glyph">${sign.sym}</div>
+      <div>
+        <div class="sc-sign-name">${sign.name}</div>
+        <div class="sc-dates">${sign.dates} · ${sign.el}</div>
+      </div>
+    </div>
+    <div class="sc-reading">${currentReading.reading}</div>
+    <div class="sc-tokens">
+      <div class="sc-token-lucky">
+        <div class="sc-tlabel">✦ Lucky token</div>
+        <div class="sc-tticker">${tokens.lucky}</div>
+        <div class="sc-twhy">${currentReading.lucky_reason}</div>
+      </div>
+      <div class="sc-token-unlucky">
+        <div class="sc-tlabel">✕ Avoid today</div>
+        <div class="sc-tticker">${tokens.unlucky}</div>
+        <div class="sc-twhy">${currentReading.unlucky_reason}</div>
+      </div>
+    </div>
+    <div class="sc-footer">
+      <span>not financial advice</span>
+      <span class="sc-url">cryptoscope.xyz</span>
+    </div>
+  `;
+}
+
+async function captureCard() {
+  setStatus('📸 Capturing your reading...');
+  buildShareCard();
+  const sc = document.getElementById('shareCanvas');
+  sc.style.left = '0';
+  sc.style.top = '0';
+  sc.style.zIndex = '-1';
+
+  try {
+    const canvas = await html2canvas(sc, {
+      backgroundColor: '#060811',
+      scale: 2,
+      useCORS: true,
+      logging: false
+    });
+    sc.style.left = '-9999px';
+    sc.style.top = '-9999px';
+
+    const link = document.createElement('a');
+    link.download = `cryptoscope-${SIGNS[currentSign].name.toLowerCase()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    setStatus('✦ Card saved to your device!');
+  } catch(e) {
+    sc.style.left = '-9999px';
+    setStatus('Could not capture — try a screenshot instead.');
+  }
+}
+
+function shareToX() {
+  if (!currentReading || currentSign === null) return;
+  const sign = SIGNS[currentSign];
+  const text = `My ${sign.sym} ${sign.name} Cryptoscope reading today:\n\n"${currentReading.reading.substring(0,180)}..."\n\n✦ Lucky: $${currentTokens.lucky} · ✕ Avoid: $${currentTokens.unlucky}\n\ncryptoscope.xyz`;
+  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+}
+
+function shareToFarcaster() {
+  if (!currentReading || currentSign === null) return;
+  const sign = SIGNS[currentSign];
+  const text = `${sign.sym} ${sign.name} Cryptoscope reading:\n\n"${currentReading.reading.substring(0,200)}"\n\n✦ $${currentTokens.lucky} · ✕ $${currentTokens.unlucky}\n\ncryptoscope.xyz`;
+  const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank', 'width=600,height=500');
+}
+
+function setStatus(msg) {
+  const el = document.getElementById('shareStatus');
+  if (el) { el.textContent = msg; setTimeout(() => { el.textContent=''; }, 4000); }
+}
+</script>
+</body>
+</html>
